@@ -33,7 +33,7 @@ interface EquipmentPieceInput {
 // Type for an alternative option
 interface AlternativeOption {
   name: string;
-  description: string;
+  description?: string;
 }
 
 interface BuildFormProps {
@@ -192,13 +192,16 @@ export function BuildForm({ initialData, isEditing = false }: BuildFormProps) {
         formData.append("image", imageFile);
       }
 
-      // Prepare the build data
+      // Prepare the build data with clear structure
       const buildData = {
         ...values,
         equipment,
         alternatives: Object.keys(alternatives).length > 0 ? alternatives : undefined,
+        // If we're editing, make sure to explicitly include the ID
+        ...(isEditing && initialData?.id ? { id: initialData.id } : {})
       };
 
+      console.log("Sending build data:", buildData);
       formData.append("data", JSON.stringify(buildData));
 
       // Make the API request

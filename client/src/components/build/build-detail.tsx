@@ -179,8 +179,8 @@ export function BuildDetail({ build }: BuildDetailProps) {
                 
                 {equip.offHand && (
                   <EquipmentSlot
-                    name={equip.offHand.name}
-                    tier={equip.offHand.tier}
+                    name={equip.offHand.name || ""}
+                    tier={equip.offHand.tier || undefined}
                     quality={equip.offHand.quality}
                     type="Off-hand"
                     size="large"
@@ -219,8 +219,8 @@ export function BuildDetail({ build }: BuildDetailProps) {
                 
                 {equip.cape && (
                   <EquipmentSlot
-                    name={equip.cape.name}
-                    tier={equip.cape.tier}
+                    name={equip.cape.name || ""}
+                    tier={equip.cape.tier || undefined}
                     quality={equip.cape.quality}
                     type="Cape"
                     size="large"
@@ -229,8 +229,8 @@ export function BuildDetail({ build }: BuildDetailProps) {
                 
                 {equip.food && (
                   <EquipmentSlot
-                    name={equip.food.name}
-                    tier={equip.food.tier}
+                    name={equip.food.name || ""}
+                    tier={equip.food.tier || undefined}
                     type="Food"
                     size="large"
                   />
@@ -238,8 +238,8 @@ export function BuildDetail({ build }: BuildDetailProps) {
                 
                 {equip.potion && (
                   <EquipmentSlot
-                    name={equip.potion.name}
-                    tier={equip.potion.tier}
+                    name={equip.potion.name || ""}
+                    tier={equip.potion.tier || undefined}
                     type="Potion"
                     size="large"
                   />

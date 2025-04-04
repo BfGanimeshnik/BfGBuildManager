@@ -8,26 +8,47 @@ import { useToast } from "@/hooks/use-toast";
 import { Search, Plus, LayoutGrid, List } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { type Build } from "@shared/schema";
+import { equipmentSchema } from "@shared/schema";
+import { z } from "zod";
 
 export default function BuildsPage() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [activityType, setActivityType] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
+  // Custom activityType setter that updates URL
+  const updateActivityType = (type: string | null) => {
+    setActivityType(type);
+    
+    // Update URL to reflect the activityType filter
+    if (type) {
+      const params = new URLSearchParams();
+      params.set("activityType", type);
+      setLocation(`/builds?${params.toString()}`);
+    } else {
+      setLocation("/builds");
+    }
+  };
+
   // Get activity type from URL if present
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const activityTypeParam = params.get("activityType");
-    if (activityTypeParam) {
+    
+    // Only update if it's different to prevent infinite loops
+    if (activityTypeParam !== activityType) {
       setActivityType(activityTypeParam);
     }
-  }, []);
+  }, [location]);
+
+  // Create queryKey that includes activityType to refetch when it changes
+  const queryKey = activityType ? ["/api/builds", { activityType }] : ["/api/builds"];
 
   // Fetch all builds
   const { data: builds, isLoading, isError, refetch } = useQuery<Build[]>({
-    queryKey: ["/api/builds"],
+    queryKey,
   });
 
   // Handle build deletion
@@ -117,7 +138,7 @@ export default function BuildsPage() {
                 ? "text-white border-b-2 border-[#D4AF37]"
                 : "text-[#B9BBBE] border-b-2 border-transparent hover:text-white"
             }`}
-            onClick={() => setActivityType(null)}
+            onClick={() => updateActivityType(null)}
           >
             All Builds
           </button>
@@ -127,7 +148,7 @@ export default function BuildsPage() {
                 ? "text-white border-b-2 border-[#D4AF37]"
                 : "text-[#B9BBBE] border-b-2 border-transparent hover:text-white"
             }`}
-            onClick={() => setActivityType("recent")}
+            onClick={() => updateActivityType("recent")}
           >
             Recent
           </button>
@@ -137,7 +158,7 @@ export default function BuildsPage() {
                 ? "text-white border-b-2 border-[#D4AF37]"
                 : "text-[#B9BBBE] border-b-2 border-transparent hover:text-white"
             }`}
-            onClick={() => setActivityType("meta")}
+            onClick={() => updateActivityType("meta")}
           >
             Meta Builds
           </button>
@@ -153,7 +174,7 @@ export default function BuildsPage() {
               <select
                 className="inline-flex justify-center items-center px-4 py-2 bg-[#2F3136] rounded-md text-sm font-medium text-white hover:bg-opacity-80 border border-[#202225] focus:outline-none"
                 value={activityType || ""}
-                onChange={(e) => setActivityType(e.target.value || null)}
+                onChange={(e) => updateActivityType(e.target.value || null)}
               >
                 <option value="">All Activity Types</option>
                 {activityTypes.map((type) => (
@@ -171,7 +192,7 @@ export default function BuildsPage() {
                   {activityType}
                   <button
                     className="ml-1.5 text-[#B9BBBE] hover:text-white"
-                    onClick={() => setActivityType(null)}
+                    onClick={() => updateActivityType(null)}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -262,13 +283,13 @@ export default function BuildsPage() {
                 key={build.id}
                 id={build.id}
                 name={build.name}
-                description={build.description}
-                activityType={build.activityType}
-                tier={build.tier}
-                imgUrl={build.imgUrl}
-                equipment={build.equipment}
-                updatedAt={build.updatedAt}
-                isMeta={build.isMeta}
+                description={build.description || undefined}
+                activityType={build.activityType || ''}
+                tier={build.tier || ''}
+                imgUrl={build.imgUrl || undefined}
+                equipment={build.equipment as z.infer<typeof equipmentSchema>}
+                updatedAt={build.updatedAt || new Date()}
+                isMeta={build.isMeta || undefined}
                 onView={(id) => setLocation(`/builds/${id}`)}
                 onEdit={(id) => setLocation(`/builds/${id}/edit`)}
                 onDelete={handleDelete}

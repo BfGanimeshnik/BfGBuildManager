@@ -21,11 +21,12 @@ type SidebarItemProps = {
   icon: React.ReactNode;
   children: React.ReactNode;
   current: boolean;
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 };
 
-const SidebarItem = ({ href, icon, children, current }: SidebarItemProps) => (
+const SidebarItem = ({ href, icon, children, current, onClick }: SidebarItemProps) => (
   <div className="sidebar-item-container">
-    <Link href={href}>
+    <Link href={href} onClick={onClick}>
       <div
         className={`sidebar-item flex items-center px-4 py-2 text-sm rounded-md w-full cursor-pointer ${
           current ? "active" : ""
@@ -66,6 +67,17 @@ export function Sidebar() {
     }));
   };
 
+  // Функция для обновления типа активности
+  const [setLocation] = useLocation();
+  
+  const handleActivityTypeChange = (activityType: string) => {
+    // Создание URL с параметром типа активности
+    const params = new URLSearchParams();
+    params.set("activityType", activityType);
+    // Программное обновление URL с перезагрузкой страницы для применения фильтров
+    window.location.href = `/builds?${params.toString()}`;
+  };
+  
   const handleLogout = async () => {
     try {
       await logoutMutation.mutateAsync();
@@ -160,44 +172,68 @@ export function Sidebar() {
         {expandedCategories.categories && (
           <div className="space-y-1 px-2">
             <SidebarItem
-              href="/builds?activityType=Solo PvP"
+              href="#"
               icon={<Swords className="h-5 w-5" />}
               current={currentActivityType === "Solo PvP"}
+              onClick={(e) => {
+                e.preventDefault();
+                handleActivityTypeChange("Solo PvP");
+              }}
             >
               Solo PvP
             </SidebarItem>
             <SidebarItem
-              href="/builds?activityType=Group PvP"
+              href="#"
               icon={<Users className="h-5 w-5" />}
               current={currentActivityType === "Group PvP"}
+              onClick={(e) => {
+                e.preventDefault();
+                handleActivityTypeChange("Group PvP");
+              }}
             >
               Group PvP
             </SidebarItem>
             <SidebarItem
-              href="/builds?activityType=Ganking"
+              href="#"
               icon={<Clock className="h-5 w-5" />}
               current={currentActivityType === "Ganking"}
+              onClick={(e) => {
+                e.preventDefault();
+                handleActivityTypeChange("Ganking");
+              }}
             >
               Ganking
             </SidebarItem>
             <SidebarItem
-              href="/builds?activityType=Gathering"
+              href="#"
               icon={<Package className="h-5 w-5" />}
               current={currentActivityType === "Gathering"}
+              onClick={(e) => {
+                e.preventDefault();
+                handleActivityTypeChange("Gathering");
+              }}
             >
               Gathering
             </SidebarItem>
             <SidebarItem
-              href="/builds?activityType=Avalon"
+              href="#"
               icon={<Globe className="h-5 w-5" />}
               current={currentActivityType === "Avalon"}
+              onClick={(e) => {
+                e.preventDefault();
+                handleActivityTypeChange("Avalon");
+              }}
             >
               Avalon
             </SidebarItem>
             <SidebarItem
-              href="/builds?activityType=Farming"
+              href="#"
               icon={<ShieldCheck className="h-5 w-5" />}
               current={currentActivityType === "Farming"}
+              onClick={(e) => {
+                e.preventDefault();
+                handleActivityTypeChange("Farming");
+              }}
             >
               Farming
             </SidebarItem>

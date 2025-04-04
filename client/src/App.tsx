@@ -13,6 +13,7 @@ import EditBuildPage from "@/pages/builds/edit";
 import SettingsPage from "@/pages/settings";
 import StatsPage from "@/pages/stats";
 import { ProtectedRoute } from "./lib/protected-route";
+import { PublicRoute } from "./lib/public-route";
 import { AuthProvider, useAuth } from "./hooks/use-auth";
 
 function Router() {
@@ -20,21 +21,18 @@ function Router() {
   const [location, setLocation] = useLocation();
   
   // Use useEffect for navigation to avoid React warnings
-  useEffect(() => {
-    if (!isLoading && !user && location === "/") {
-      setLocation("/auth");
-    }
-  }, [user, isLoading, location, setLocation]);
+  // We no longer need to redirect unauthenticated users from the home page
+  // since we've made the build listing and detail pages public
   
   return (
     <Switch>
       <Route path="/auth" component={AuthPage} />
-      <ProtectedRoute path="/" component={() => (
+      <PublicRoute path="/" component={() => (
         <AppLayout>
           <BuildsPage />
         </AppLayout>
       )} />
-      <ProtectedRoute path="/builds" component={() => (
+      <PublicRoute path="/builds" component={() => (
         <AppLayout>
           <BuildsPage />
         </AppLayout>
@@ -49,7 +47,7 @@ function Router() {
           <EditBuildPage />
         </AppLayout>
       )} />
-      <ProtectedRoute path="/builds/:id" component={() => (
+      <PublicRoute path="/builds/:id" component={() => (
         <AppLayout>
           <BuildDetailPage />
         </AppLayout>

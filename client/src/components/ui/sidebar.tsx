@@ -11,7 +11,10 @@ import {
   Globe,
   Package,
   ShieldCheck,
+  LogIn,
+  Plus,
 } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 type SidebarItemProps = {
   href: string;
@@ -37,6 +40,9 @@ const SidebarItem = ({ href, icon, children, current }: SidebarItemProps) => (
 
 export function Sidebar() {
   const [location] = useLocation();
+  const { user, logoutMutation } = useAuth();
+  const isAuthenticated = !!user;
+  
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
     management: true,
     categories: true,
@@ -51,10 +57,7 @@ export function Sidebar() {
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
+      await logoutMutation.mutateAsync();
       window.location.href = "/";
     } catch (error) {
       console.error("Logout failed:", error);
@@ -70,17 +73,19 @@ export function Sidebar() {
         </div>
         <div className="ml-3">
           <h1 className="font-bold text-lg">Albion Bot</h1>
-          <p className="text-[#B9BBBE] text-xs">Admin Dashboard</p>
+          <p className="text-[#B9BBBE] text-xs">
+            {isAuthenticated ? 'Admin Dashboard' : 'Build Browser'}
+          </p>
         </div>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 pt-4 pb-4 overflow-y-auto fancy-scrollbar">
-        {/* Management Section */}
+        {/* Management Section - Only show admin options when authenticated */}
         <div className="px-4 mb-3 flex items-center justify-between cursor-pointer" 
              onClick={() => toggleCategory("management")}>
           <h2 className="text-[#B9BBBE] uppercase tracking-wider text-xs font-semibold">
-            Management
+            {isAuthenticated ? 'Management' : 'Navigation'}
           </h2>
           <ChevronDown 
             className={`h-4 w-4 text-[#B9BBBE] transform transition-transform ${
@@ -94,24 +99,36 @@ export function Sidebar() {
             <SidebarItem
               href="/builds"
               icon={<Package className="h-5 w-5" />}
-              current={location === "/" || location.startsWith("/builds")}
+              current={location === "/" || location === "/builds" || location.startsWith("/builds") && !location.includes("edit") && !location.includes("new")}
             >
               Builds
             </SidebarItem>
-            <SidebarItem
-              href="/settings"
-              icon={<Cog className="h-5 w-5" />}
-              current={location === "/settings"}
-            >
-              Settings
-            </SidebarItem>
-            <SidebarItem
-              href="/stats"
-              icon={<ChartBarStacked className="h-5 w-5" />}
-              current={location === "/stats"}
-            >
-              Statistics
-            </SidebarItem>
+            
+            {isAuthenticated && (
+              <>
+                <SidebarItem
+                  href="/builds/new"
+                  icon={<Plus className="h-5 w-5" />}
+                  current={location === "/builds/new"}
+                >
+                  Create Build
+                </SidebarItem>
+                <SidebarItem
+                  href="/settings"
+                  icon={<Cog className="h-5 w-5" />}
+                  current={location === "/settings"}
+                >
+                  Settings
+                </SidebarItem>
+                <SidebarItem
+                  href="/stats"
+                  icon={<ChartBarStacked className="h-5 w-5" />}
+                  current={location === "/stats"}
+                >
+                  Statistics
+                </SidebarItem>
+              </>
+            )}
           </div>
         )}
 
@@ -178,21 +195,44 @@ export function Sidebar() {
 
       {/* User Area */}
       <div className="p-4 border-t border-[#202225] flex items-center">
-        <div className="w-8 h-8 rounded-full bg-[#5865F2] flex items-center justify-center">
-          <span className="text-xs font-medium">AD</span>
-        </div>
-        <div className="ml-2">
-          <p className="text-sm font-medium">Admin</p>
-          <p className="text-xs text-[#B9BBBE]">Online</p>
-        </div>
-        <div className="ml-auto flex space-x-2">
-          <button 
-            className="text-[#B9BBBE] hover:text-white"
-            onClick={handleLogout}
-          >
-            <LogOut className="h-5 w-5" />
-          </button>
-        </div>
+        {isAuthenticated ? (
+          <>
+            <div className="w-8 h-8 rounded-full bg-[#5865F2] flex items-center justify-center">
+              <span className="text-xs font-medium">
+                {user?.username?.slice(0, 2).toUpperCase() || 'AD'}
+              </span>
+            </div>
+            <div className="ml-2">
+              <p className="text-sm font-medium">{user?.username || 'Admin'}</p>
+              <p className="text-xs text-[#B9BBBE]">Online</p>
+            </div>
+            <div className="ml-auto flex space-x-2">
+              <button 
+                className="text-[#B9BBBE] hover:text-white"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-5 w-5" />
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="w-8 h-8 rounded-full bg-[#5865F2] flex items-center justify-center">
+              <span className="text-xs font-medium">?</span>
+            </div>
+            <div className="ml-2">
+              <p className="text-sm font-medium">Guest</p>
+              <p className="text-xs text-[#B9BBBE]">Browse Only</p>
+            </div>
+            <div className="ml-auto flex space-x-2">
+              <Link href="/auth">
+                <div className="text-[#B9BBBE] hover:text-white">
+                  <LogIn className="h-5 w-5" />
+                </div>
+              </Link>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

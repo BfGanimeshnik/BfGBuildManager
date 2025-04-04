@@ -1,12 +1,16 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Info } from "lucide-react";
-import { type Build } from "@shared/schema";
+import { type Build, equipmentSchema, type EquipmentPiece } from "@shared/schema";
+import { z } from "zod";
 
 interface DiscordPreviewProps {
   build: Build;
 }
 
 export function DiscordPreview({ build }: DiscordPreviewProps) {
+  // Validate equipment structure using Zod schema
+  const equip = equipmentSchema.parse(build.equipment);
+  
   // Function to get emoji for equipment type
   const getEmoji = (type: string): string => {
     const emojis: Record<string, string> = {
@@ -23,6 +27,15 @@ export function DiscordPreview({ build }: DiscordPreviewProps) {
     };
     
     return emojis[type] || "❓";
+  };
+  
+  // Function to create an absolute URL from a relative path
+  const getAbsoluteImageUrl = (relativeUrl: string) => {
+    if (!relativeUrl) return '';
+    if (relativeUrl.startsWith('http')) {
+      return relativeUrl;
+    }
+    return `${window.location.origin}${relativeUrl}`;
   };
 
   return (
@@ -65,49 +78,59 @@ export function DiscordPreview({ build }: DiscordPreviewProps) {
                 <span className="text-xs text-[#B9BBBE]">{build.tier} Gear</span>
               </div>
               
+              {build.imgUrl && (
+                <div className="border-b border-[#202225]">
+                  <img 
+                    src={getAbsoluteImageUrl(build.imgUrl)} 
+                    alt={build.name}
+                    className="w-full h-auto max-h-48 object-contain bg-[#2F3136] p-2"
+                  />
+                </div>
+              )}
+              
               <div className="px-4 py-3 flex flex-wrap gap-3">
-                {build.equipment.weapon && (
+                {equip.weapon && (
                   <div className="flex items-center bg-[#202225]/30 rounded p-1.5">
                     <div className="w-6 h-6 bg-[#36393F] rounded-full flex items-center justify-center mr-2">
                       <span className="text-xs">{getEmoji('weapon')}</span>
                     </div>
-                    <span className="text-xs font-medium">{build.equipment.weapon.name}</span>
+                    <span className="text-xs font-medium">{equip.weapon.name}</span>
                   </div>
                 )}
                 
-                {build.equipment.offHand && (
+                {equip.offHand && (
                   <div className="flex items-center bg-[#202225]/30 rounded p-1.5">
                     <div className="w-6 h-6 bg-[#36393F] rounded-full flex items-center justify-center mr-2">
                       <span className="text-xs">{getEmoji('offHand')}</span>
                     </div>
-                    <span className="text-xs font-medium">{build.equipment.offHand.name}</span>
+                    <span className="text-xs font-medium">{equip.offHand.name}</span>
                   </div>
                 )}
                 
-                {build.equipment.head && (
+                {equip.head && (
                   <div className="flex items-center bg-[#202225]/30 rounded p-1.5">
                     <div className="w-6 h-6 bg-[#36393F] rounded-full flex items-center justify-center mr-2">
                       <span className="text-xs">{getEmoji('head')}</span>
                     </div>
-                    <span className="text-xs font-medium">{build.equipment.head.name}</span>
+                    <span className="text-xs font-medium">{equip.head.name}</span>
                   </div>
                 )}
                 
-                {build.equipment.chest && (
+                {equip.chest && (
                   <div className="flex items-center bg-[#202225]/30 rounded p-1.5">
                     <div className="w-6 h-6 bg-[#36393F] rounded-full flex items-center justify-center mr-2">
                       <span className="text-xs">{getEmoji('chest')}</span>
                     </div>
-                    <span className="text-xs font-medium">{build.equipment.chest.name}</span>
+                    <span className="text-xs font-medium">{equip.chest.name}</span>
                   </div>
                 )}
                 
-                {build.equipment.shoes && (
+                {equip.shoes && (
                   <div className="flex items-center bg-[#202225]/30 rounded p-1.5">
                     <div className="w-6 h-6 bg-[#36393F] rounded-full flex items-center justify-center mr-2">
                       <span className="text-xs">{getEmoji('shoes')}</span>
                     </div>
-                    <span className="text-xs font-medium">{build.equipment.shoes.name}</span>
+                    <span className="text-xs font-medium">{equip.shoes.name}</span>
                   </div>
                 )}
               </div>

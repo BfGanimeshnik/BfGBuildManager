@@ -139,6 +139,12 @@ export function BuildDetail({ build }: BuildDetailProps) {
               <h3 className="text-lg font-medium mb-3">Build Information</h3>
               {build.imgUrl && (
                 <div className="mt-2 mb-4">
+                  <div className="text-[#B9BBBE] text-sm mb-1">Build Image</div>
+                  <img 
+                    src={getAbsoluteImageUrl(build.imgUrl)} 
+                    alt={build.name}
+                    className="w-full h-auto rounded-md mb-2 border border-[#202225]"
+                  />
                   <div className="text-[#B9BBBE] text-sm mb-1">Image URL</div>
                   <div className="bg-[#202225]/30 rounded p-2 font-mono text-xs break-all">
                     {build.imgUrl}

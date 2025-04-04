@@ -43,7 +43,7 @@ const buildCommand = {
           new ButtonBuilder()
             .setLabel('View on Website')
             .setStyle(ButtonStyle.Link)
-            .setURL(`${process.env.PUBLIC_URL || 'http://localhost:5000'}/builds/${build.id}`)
+            .setURL(`${process.env.PUBLIC_URL || 'https://bfgbuildmanager.onrender.com'}/builds/${build.id}`)
         );
       
       await interaction.editReply({ embeds: [embed], components: [actionRow] });

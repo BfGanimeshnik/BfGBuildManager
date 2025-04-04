@@ -44,19 +44,24 @@ export function Sidebar() {
   const { user, logoutMutation } = useAuth();
   const isAuthenticated = !!user;
   
-  // Parse current activity type from URL
-  const getActivityTypeFromUrl = (): string | null => {
+  // Parse URL to get current filters
+  const getParamsFromUrl = () => {
+    let activityType: string | null = null;
+    let filterMode: string | null = null;
+    
     if (location.includes('?')) {
       const params = new URLSearchParams(location.split('?')[1]);
-      return params.get('activityType');
+      activityType = params.get('activityType');
+      filterMode = params.get('filter');
     }
-    return null;
+    return { activityType, filterMode };
   };
   
-  const currentActivityType = getActivityTypeFromUrl();
+  const { activityType: currentActivityType, filterMode: currentFilterMode } = getParamsFromUrl();
   
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
     management: true,
+    special: true,
     categories: true,
   });
 
@@ -67,13 +72,23 @@ export function Sidebar() {
     }));
   };
 
-  // Функция для обновления типа активности
+  // Функции для обновления фильтров
   const [setLocation] = useLocation();
   
   const handleActivityTypeChange = (activityType: string) => {
     // Создание URL с параметром типа активности
     const params = new URLSearchParams();
     params.set("activityType", activityType);
+    
+    // Программное обновление URL с перезагрузкой страницы для применения фильтров
+    window.location.href = `/builds?${params.toString()}`;
+  };
+  
+  const handleFilterModeChange = (filterMode: string) => {
+    // Создание URL с параметром фильтра
+    const params = new URLSearchParams();
+    params.set("filter", filterMode);
+    
     // Программное обновление URL с перезагрузкой страницы для применения фильтров
     window.location.href = `/builds?${params.toString()}`;
   };
@@ -156,11 +171,51 @@ export function Sidebar() {
           </div>
         )}
 
-        {/* Build Categories Section */}
+        {/* Special Filters Section */}
         <div className="px-4 mt-6 mb-3 flex items-center justify-between cursor-pointer"
+             onClick={() => toggleCategory("special")}>
+          <h2 className="text-[#B9BBBE] uppercase tracking-wider text-xs font-semibold">
+            Special Filters
+          </h2>
+          <ChevronDown 
+            className={`h-4 w-4 text-[#B9BBBE] transform transition-transform ${
+              expandedCategories.special ? "rotate-0" : "-rotate-90"
+            }`}
+          />
+        </div>
+        
+        {expandedCategories.special && (
+          <div className="space-y-1 px-2 mb-4">
+            <SidebarItem
+              href="#"
+              icon={<ShieldCheck className="h-5 w-5 text-yellow-400" />}
+              current={currentFilterMode === "meta"}
+              onClick={(e) => {
+                e.preventDefault();
+                handleFilterModeChange("meta");
+              }}
+            >
+              Meta Builds
+            </SidebarItem>
+            <SidebarItem
+              href="#"
+              icon={<Clock className="h-5 w-5 text-blue-400" />}
+              current={currentFilterMode === "recent"}
+              onClick={(e) => {
+                e.preventDefault();
+                handleFilterModeChange("recent");
+              }}
+            >
+              Recent Builds
+            </SidebarItem>
+          </div>
+        )}
+
+        {/* Build Categories Section */}
+        <div className="px-4 mt-2 mb-3 flex items-center justify-between cursor-pointer"
              onClick={() => toggleCategory("categories")}>
           <h2 className="text-[#B9BBBE] uppercase tracking-wider text-xs font-semibold">
-            Build Categories
+            Activity Types
           </h2>
           <ChevronDown 
             className={`h-4 w-4 text-[#B9BBBE] transform transition-transform ${

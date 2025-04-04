@@ -38,26 +38,54 @@ export default function BuildsPage() {
     }
   };
 
-  // Custom filter mode setter
+  // Custom filter mode setter that updates URL
   const updateFilterMode = (mode: "all" | "recent" | "meta") => {
     setFilterMode(mode);
     
     // Clear activity type when switching to special filters
     if (mode !== "all") {
       setActivityType(null);
+      
+      // Update URL to reflect the filter mode
+      const params = new URLSearchParams();
+      params.set("filter", mode);
+      setLocation(`/builds?${params.toString()}`);
+    } else {
+      // For "all" mode, just go to base builds URL
+      setLocation("/builds");
     }
   };
 
-  // Get activity type from URL if present
+  // Get filters from URL if present
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const activityTypeParam = params.get("activityType");
+    const filterParam = params.get("filter");
     
-    // Only update if it's different to prevent infinite loops
+    // Update activity type if different
     if (activityTypeParam !== activityType) {
       setActivityType(activityTypeParam);
-      // Reset filter mode when URL changes
-      setFilterMode("all");
+      // Reset filter mode only when changing activity type
+      if (activityTypeParam && !filterParam) {
+        setFilterMode("all");
+      }
+    }
+    
+    // Update filter mode if specified in URL
+    if (filterParam) {
+      if (filterParam === "meta") {
+        setFilterMode("meta");
+        // Clear activity type when using special filters
+        if (activityType) {
+          setActivityType(null);
+        }
+      } else if (filterParam === "recent") {
+        setFilterMode("recent");
+        // Clear activity type when using special filters
+        if (activityType) {
+          setActivityType(null);
+        }
+      }
     }
   }, [location]);
 

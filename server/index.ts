@@ -20,18 +20,26 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 // Initialize session middleware with storage's session store
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Set trust proxy for secure cookies to work behind a proxy (like Render)
+if (isProduction) {
+  app.set('trust proxy', 1);
+}
+
 app.use(session({
   store: storage.sessionStore,
-  secret: 'albion-builds-secret-key',
+  secret: process.env.SESSION_SECRET || 'albion-builds-secret-key',
   resave: false,
   saveUninitialized: false,
   name: 'albion_session',
   cookie: { 
-    secure: process.env.NODE_ENV === 'production',
+    secure: isProduction, // use HTTPS in production
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     httpOnly: true,
-    sameSite: 'lax',
-    path: '/'
+    sameSite: isProduction ? 'none' : 'lax', // sameSite: 'none' is needed for cross-site requests
+    path: '/',
+    domain: isProduction ? '.onrender.com' : undefined // For render.com domains
   }
 }));
 

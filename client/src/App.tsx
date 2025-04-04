@@ -1,10 +1,10 @@
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Route, Switch } from "wouter";
+import { Route, Switch, useLocation } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import { queryClient } from "./lib/queryClient";
 import NotFound from "@/pages/not-found";
 import AppLayout from "@/components/layout/app-layout";
-import LoginPage from "@/pages/login";
+import AuthPage from "@/pages/auth-page";
 import BuildsPage from "@/pages/builds/index";
 import NewBuildPage from "@/pages/builds/new";
 import BuildDetailPage from "@/pages/builds/[id]";
@@ -15,24 +15,16 @@ import { AuthProvider, useAuth } from "./hooks/use-auth";
 
 function Router() {
   const { user, isLoading } = useAuth();
-
-  // Show login page if not authenticated
-  if (!isLoading && !user) {
-    return (
-      <Switch>
-        <Route path="/login" component={LoginPage} />
-        <Route path="*">
-          <Route path="*">
-            <LoginPage />
-          </Route>
-        </Route>
-      </Switch>
-    );
+  const [location, setLocation] = useLocation();
+  
+  // Redirect to auth page if accessing home while not authenticated
+  if (!isLoading && !user && location === "/") {
+    setLocation("/auth");
   }
-
+  
   return (
     <Switch>
-      <Route path="/login" component={LoginPage} />
+      <Route path="/auth" component={AuthPage} />
       <ProtectedRoute path="/" component={() => (
         <AppLayout>
           <BuildsPage />

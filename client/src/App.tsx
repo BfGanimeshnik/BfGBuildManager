@@ -9,6 +9,7 @@ import AuthPage from "@/pages/auth-page";
 import BuildsPage from "@/pages/builds/index";
 import NewBuildPage from "@/pages/builds/new";
 import BuildDetailPage from "@/pages/builds/[id]";
+import EditBuildPage from "@/pages/builds/edit";
 import SettingsPage from "@/pages/settings";
 import StatsPage from "@/pages/stats";
 import { ProtectedRoute } from "./lib/protected-route";
@@ -41,6 +42,11 @@ function Router() {
       <ProtectedRoute path="/builds/new" component={() => (
         <AppLayout>
           <NewBuildPage />
+        </AppLayout>
+      )} />
+      <ProtectedRoute path="/builds/:id/edit" component={() => (
+        <AppLayout>
+          <EditBuildPage />
         </AppLayout>
       )} />
       <ProtectedRoute path="/builds/:id" component={() => (

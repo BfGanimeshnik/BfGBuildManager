@@ -56,7 +56,7 @@ export function BuildDetail({ build }: BuildDetailProps) {
     }
   };
 
-  const formatDate = (dateString: Date | string) => {
+  const formatDate = (dateString: Date | string | null) => {
     if (!dateString) return "Unknown";
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -72,10 +72,8 @@ export function BuildDetail({ build }: BuildDetailProps) {
         <div className="flex justify-between items-start mb-6">
           <div>
             <div className="flex items-center">
-              <Link href="/builds">
-                <a className="mr-3 p-1 rounded-full bg-[#36393F] inline-flex items-center justify-center">
-                  <ArrowLeft className="h-5 w-5" />
-                </a>
+              <Link href="/builds" className="mr-3 p-1 rounded-full bg-[#36393F] inline-flex items-center justify-center">
+                <ArrowLeft className="h-5 w-5" />
               </Link>
               <h2 className="text-2xl font-bold">{build.name}</h2>
             </div>
@@ -96,11 +94,12 @@ export function BuildDetail({ build }: BuildDetailProps) {
           </div>
           
           <div className="flex space-x-2">
-            <Button asChild>
-              <Link href={`/builds/${build.id}/edit`}>
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Build
-              </Link>
+            <Button 
+              variant="default"
+              onClick={() => setLocation(`/builds/${build.id}/edit`)}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Edit Build
             </Button>
             <Button 
               variant="destructive" 

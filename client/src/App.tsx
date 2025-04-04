@@ -10,64 +10,71 @@ import NewBuildPage from "@/pages/builds/new";
 import BuildDetailPage from "@/pages/builds/[id]";
 import SettingsPage from "@/pages/settings";
 import StatsPage from "@/pages/stats";
-import { useEffect, useState } from "react";
+import { ProtectedRoute } from "./lib/protected-route";
+import { AuthProvider, useAuth } from "./hooks/use-auth";
 
 function Router() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const { user, isLoading } = useAuth();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await fetch('/api/auth/me', {
-          credentials: 'include'
-        });
-        setIsAuthenticated(res.ok);
-      } catch (error) {
-        setIsAuthenticated(false);
-      }
-    };
-    
-    checkAuth();
-  }, []);
-
-  // Show loading state while checking authentication
-  if (isAuthenticated === null) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  // If not authenticated, show login page
-  if (!isAuthenticated) {
+  // Show login page if not authenticated
+  if (!isLoading && !user) {
     return (
       <Switch>
-        <Route path="*" component={LoginPage} />
+        <Route path="/login" component={LoginPage} />
+        <Route path="*">
+          <Route path="*">
+            <LoginPage />
+          </Route>
+        </Route>
       </Switch>
     );
   }
 
   return (
-    <AppLayout>
-      <Switch>
-        <Route path="/" component={BuildsPage} />
-        <Route path="/builds" component={BuildsPage} />
-        <Route path="/builds/new" component={NewBuildPage} />
-        <Route path="/builds/:id" component={BuildDetailPage} />
-        <Route path="/settings" component={SettingsPage} />
-        <Route path="/stats" component={StatsPage} />
-        <Route component={NotFound} />
-      </Switch>
-    </AppLayout>
+    <Switch>
+      <Route path="/login" component={LoginPage} />
+      <ProtectedRoute path="/" component={() => (
+        <AppLayout>
+          <BuildsPage />
+        </AppLayout>
+      )} />
+      <ProtectedRoute path="/builds" component={() => (
+        <AppLayout>
+          <BuildsPage />
+        </AppLayout>
+      )} />
+      <ProtectedRoute path="/builds/new" component={() => (
+        <AppLayout>
+          <NewBuildPage />
+        </AppLayout>
+      )} />
+      <ProtectedRoute path="/builds/:id" component={() => (
+        <AppLayout>
+          <BuildDetailPage />
+        </AppLayout>
+      )} />
+      <ProtectedRoute path="/settings" component={() => (
+        <AppLayout>
+          <SettingsPage />
+        </AppLayout>
+      )} />
+      <ProtectedRoute path="/stats" component={() => (
+        <AppLayout>
+          <StatsPage />
+        </AppLayout>
+      )} />
+      <Route component={NotFound} />
+    </Switch>
   );
 }
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
+      <AuthProvider>
+        <Router />
+        <Toaster />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

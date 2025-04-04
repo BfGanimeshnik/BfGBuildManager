@@ -3,16 +3,23 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
 import { Shield } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { useLocation } from "wouter";
 
 export default function LoginPage() {
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const { user, loginMutation } = useAuth();
+  const [, setLocation] = useLocation();
   const [formData, setFormData] = useState({
     username: "",
     password: "",
   });
+
+  // Redirect to home if already logged in
+  if (user) {
+    setLocation("/");
+    return null;
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -24,34 +31,11 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || "Invalid credentials");
+    loginMutation.mutate(formData, {
+      onSuccess: () => {
+        setLocation("/");
       }
-
-      // Successful login, reload page to trigger authentication check
-      window.location.href = "/";
-    } catch (error) {
-      console.error("Login failed:", error);
-      toast({
-        title: "Login Failed",
-        description: error instanceof Error ? error.message : "Invalid credentials",
-        variant: "destructive",
-      });
-      setIsLoading(false);
-    }
+    });
   };
 
   return (
@@ -101,8 +85,8 @@ export default function LoginPage() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button className="w-full" disabled={isLoading}>
-              {isLoading ? "Logging in..." : "Login"}
+            <Button className="w-full" disabled={loginMutation.isPending}>
+              {loginMutation.isPending ? "Logging in..." : "Login"}
             </Button>
           </CardFooter>
         </form>

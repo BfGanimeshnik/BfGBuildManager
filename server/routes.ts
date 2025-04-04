@@ -44,7 +44,11 @@ const upload = multer({
   }
 });
 
+import { setupAuth } from "./auth";
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Set up authentication routes
+  setupAuth(app);
   const httpServer = createServer(app);
   
   // Error handler middleware
@@ -60,74 +64,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(500).json({ message: err.message || "Internal server error" });
   };
 
-  // Authentication endpoints (simplified for in-memory implementation)
-  app.post("/api/auth/login", async (req: Request, res: Response) => {
-    try {
-      const { username, password } = req.body;
-      
-      if (!username || !password) {
-        return res.status(400).json({ message: "Username and password are required" });
-      }
-      
-      const user = await storage.getUserByUsername(username);
-      
-      if (!user || user.password !== password) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      
-      // Set session data
-      if (req.session) {
-        req.session.userId = user.id;
-        req.session.isAdmin = user.isAdmin;
-      }
-      
-      res.json({ 
-        id: user.id,
-        username: user.username,
-        isAdmin: user.isAdmin 
-      });
-    } catch (err) {
-      handleError(err, res);
-    }
-  });
-  
-  app.post("/api/auth/logout", (req: Request, res: Response) => {
-    if (req.session) {
-      req.session.destroy((err) => {
-        if (err) {
-          return res.status(500).json({ message: "Failed to logout" });
-        }
-        res.json({ message: "Logged out successfully" });
-      });
-    } else {
-      res.json({ message: "Logged out successfully" });
-    }
-  });
-  
-  app.get("/api/auth/me", async (req: Request, res: Response) => {
-    if (!req.session || !req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
-    try {
-      const user = await storage.getUser(req.session.userId);
-      
-      if (!user) {
-        if (req.session) {
-          req.session.destroy((err) => {});
-        }
-        return res.status(401).json({ message: "User not found" });
-      }
-      
-      res.json({
-        id: user.id,
-        username: user.username,
-        isAdmin: user.isAdmin
-      });
-    } catch (err) {
-      handleError(err, res);
-    }
-  });
+  // Authentication is handled by setupAuth function
 
   // Build endpoints
   app.get("/api/builds", async (req: Request, res: Response) => {

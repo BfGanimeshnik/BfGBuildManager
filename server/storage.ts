@@ -3,6 +3,12 @@ import {
   builds, type Build, type InsertBuild,
   botSettings, type BotSettings, type InsertBotSettings
 } from "@shared/schema";
+import session from "express-session";
+import connectPg from "connect-pg-simple";
+import { pool } from "./db";
+
+// Create connect-pg-simple session store
+const PostgresSessionStore = connectPg(session);
 
 export interface IStorage {
   // User management
@@ -22,7 +28,17 @@ export interface IStorage {
   // Bot settings
   getBotSettings(): Promise<BotSettings | undefined>;
   updateBotSettings(settings: InsertBotSettings): Promise<BotSettings>;
+  
+  // Session store for express-session
+  sessionStore: session.Store;
 }
+
+import createMemoryStore from "memorystore";
+import { eq, and } from "drizzle-orm";
+import { db } from "./db";
+
+// Create memory store for MemStorage
+const MemoryStore = createMemoryStore(session);
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
@@ -30,12 +46,16 @@ export class MemStorage implements IStorage {
   private botSettings: BotSettings | undefined;
   private userId: number;
   private buildId: number;
+  public sessionStore: session.Store;
 
   constructor() {
     this.users = new Map();
     this.builds = new Map();
     this.userId = 1;
     this.buildId = 1;
+    this.sessionStore = new MemoryStore({
+      checkPeriod: 86400000 // prune expired entries every 24h
+    });
     
     // Add default admin user
     this.createUser({
@@ -280,4 +300,104 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  public sessionStore: session.Store;
+
+  constructor() {
+    this.sessionStore = new PostgresSessionStore({ 
+      pool, 
+      createTableIfMissing: true 
+    });
+  }
+
+  // User management methods
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+
+  // Build management methods
+  async getBuilds(): Promise<Build[]> {
+    return await db.select().from(builds);
+  }
+
+  async getBuild(id: number): Promise<Build | undefined> {
+    const [build] = await db.select().from(builds).where(eq(builds.id, id));
+    return build;
+  }
+
+  async getBuildByCommandAlias(commandAlias: string): Promise<Build | undefined> {
+    const [build] = await db.select().from(builds).where(eq(builds.commandAlias, commandAlias));
+    return build;
+  }
+
+  async getBuildsByActivityType(activityType: string): Promise<Build[]> {
+    return await db.select().from(builds).where(eq(builds.activityType, activityType));
+  }
+
+  async createBuild(build: InsertBuild): Promise<Build> {
+    const [newBuild] = await db.insert(builds).values(build).returning();
+    return newBuild;
+  }
+
+  async updateBuild(id: number, buildUpdate: Partial<InsertBuild>): Promise<Build | undefined> {
+    // Set updated timestamp
+    const updateData = {
+      ...buildUpdate,
+      updatedAt: new Date()
+    };
+    
+    const [updatedBuild] = await db
+      .update(builds)
+      .set(updateData)
+      .where(eq(builds.id, id))
+      .returning();
+    
+    return updatedBuild;
+  }
+
+  async deleteBuild(id: number): Promise<boolean> {
+    await db.delete(builds).where(eq(builds.id, id));
+    // If no error was thrown, we consider it successful
+    return true;
+  }
+
+  // Bot settings methods
+  async getBotSettings(): Promise<BotSettings | undefined> {
+    const [settings] = await db.select().from(botSettings);
+    return settings;
+  }
+
+  async updateBotSettings(settings: InsertBotSettings): Promise<BotSettings> {
+    // Check if settings exist first
+    const existingSettings = await this.getBotSettings();
+    
+    if (existingSettings) {
+      // Update existing settings
+      const [updatedSettings] = await db
+        .update(botSettings)
+        .set(settings)
+        .where(eq(botSettings.id, existingSettings.id))
+        .returning();
+      
+      return updatedSettings;
+    } else {
+      // Create new settings
+      const [newSettings] = await db.insert(botSettings).values(settings).returning();
+      return newSettings;
+    }
+  }
+}
+
+// Switch to database storage
+export const storage = new DatabaseStorage();

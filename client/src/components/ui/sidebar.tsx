@@ -21,16 +21,18 @@ type SidebarItemProps = {
 };
 
 const SidebarItem = ({ href, icon, children, current }: SidebarItemProps) => (
-  <Link href={href}>
-    <a
-      className={`sidebar-item flex items-center px-4 py-2 text-sm rounded-md w-full ${
-        current ? "active" : ""
-      }`}
-    >
-      <span className="mr-3">{icon}</span>
-      {children}
-    </a>
-  </Link>
+  <div className="sidebar-item-container">
+    <Link href={href}>
+      <div
+        className={`sidebar-item flex items-center px-4 py-2 text-sm rounded-md w-full cursor-pointer ${
+          current ? "active" : ""
+        }`}
+      >
+        <span className="mr-3">{icon}</span>
+        {children}
+      </div>
+    </Link>
+  </div>
 );
 
 export function Sidebar() {

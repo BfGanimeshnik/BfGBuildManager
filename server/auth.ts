@@ -49,6 +49,7 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
+  // Initialize passport
   app.use(passport.initialize());
   app.use(passport.session());
 

@@ -3,6 +3,7 @@ import session from "express-session";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
+import { setupAuth } from "./auth";
 import fs from "fs";
 import path from "path";
 
@@ -22,15 +23,20 @@ if (!fs.existsSync(uploadDir)) {
 app.use(session({
   store: storage.sessionStore,
   secret: 'albion-builds-secret-key',
-  resave: true,
-  saveUninitialized: true,
+  resave: false,
+  saveUninitialized: false,
+  name: 'albion_session',
   cookie: { 
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     httpOnly: true,
-    sameSite: 'lax'
+    sameSite: 'lax',
+    path: '/'
   }
 }));
+
+// Setup passport auth after session
+setupAuth(app);
 
 app.use((req, res, next) => {
   const start = Date.now();

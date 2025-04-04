@@ -16,10 +16,16 @@ export default function BuildsPage() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [activityType, setActivityType] = useState<string | null>(null);
+  const [filterMode, setFilterMode] = useState<"all" | "recent" | "meta">("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   // Custom activityType setter that updates URL
   const updateActivityType = (type: string | null) => {
+    // Reset filter mode when selecting activity type
+    if (type !== activityType) {
+      setFilterMode("all");
+    }
+    
     setActivityType(type);
     
     // Update URL to reflect the activityType filter
@@ -32,6 +38,16 @@ export default function BuildsPage() {
     }
   };
 
+  // Custom filter mode setter
+  const updateFilterMode = (mode: "all" | "recent" | "meta") => {
+    setFilterMode(mode);
+    
+    // Clear activity type when switching to special filters
+    if (mode !== "all") {
+      setActivityType(null);
+    }
+  };
+
   // Get activity type from URL if present
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -40,6 +56,8 @@ export default function BuildsPage() {
     // Only update if it's different to prevent infinite loops
     if (activityTypeParam !== activityType) {
       setActivityType(activityTypeParam);
+      // Reset filter mode when URL changes
+      setFilterMode("all");
     }
   }, [location]);
 
@@ -70,7 +88,7 @@ export default function BuildsPage() {
     }
   };
 
-  // Filter builds based on search query and activity type
+  // Filter builds based on search query, activity type and filter mode
   const filteredBuilds = builds
     ? builds.filter((build) => {
         const matchesSearch =
@@ -80,9 +98,27 @@ export default function BuildsPage() {
           (build.description &&
             build.description.toLowerCase().includes(searchQuery.toLowerCase()));
 
+        // Check if it matches the activity type filter
         const matchesActivity =
           !activityType || build.activityType === activityType;
+        
+        // Apply special filters if in a special filter mode
+        if (filterMode === "recent") {
+          // Show most recent builds (created in the last 30 days)
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+          // Ensure we have a valid date
+          const updatedAt = build.updatedAt instanceof Date ? build.updatedAt : new Date();
+          const buildDate = new Date(updatedAt);
+          return matchesSearch && buildDate >= thirtyDaysAgo;
+        }
+        
+        if (filterMode === "meta") {
+          // Show only meta builds
+          return matchesSearch && build.isMeta === true;
+        }
 
+        // Default "all" mode uses activity type filter
         return matchesSearch && matchesActivity;
       })
     : [];
@@ -134,31 +170,34 @@ export default function BuildsPage() {
         <div className="px-6 pb-2 flex space-x-4 border-b border-[#202225]">
           <button
             className={`px-3 py-2 text-sm font-medium ${
-              !activityType
+              filterMode === "all" && !activityType
                 ? "text-white border-b-2 border-[#D4AF37]"
                 : "text-[#B9BBBE] border-b-2 border-transparent hover:text-white"
             }`}
-            onClick={() => updateActivityType(null)}
+            onClick={() => {
+              updateFilterMode("all");
+              updateActivityType(null);
+            }}
           >
             All Builds
           </button>
           <button
             className={`px-3 py-2 text-sm font-medium ${
-              activityType === "recent"
+              filterMode === "recent"
                 ? "text-white border-b-2 border-[#D4AF37]"
                 : "text-[#B9BBBE] border-b-2 border-transparent hover:text-white"
             }`}
-            onClick={() => updateActivityType("recent")}
+            onClick={() => updateFilterMode("recent")}
           >
             Recent
           </button>
           <button
             className={`px-3 py-2 text-sm font-medium ${
-              activityType === "meta"
+              filterMode === "meta"
                 ? "text-white border-b-2 border-[#D4AF37]"
                 : "text-[#B9BBBE] border-b-2 border-transparent hover:text-white"
             }`}
-            onClick={() => updateActivityType("meta")}
+            onClick={() => updateFilterMode("meta")}
           >
             Meta Builds
           </button>
@@ -185,31 +224,84 @@ export default function BuildsPage() {
               </select>
             </div>
 
-            {activityType && (
+            {(activityType || filterMode !== "all") && (
               <div className="flex items-center space-x-1 ml-2">
                 <span className="text-sm text-[#B9BBBE]">Active filters:</span>
-                <div className="bg-[#2F3136] rounded-full px-3 py-1 text-xs flex items-center">
-                  {activityType}
-                  <button
-                    className="ml-1.5 text-[#B9BBBE] hover:text-white"
-                    onClick={() => updateActivityType(null)}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-3.5 w-3.5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                
+                {activityType && (
+                  <div className="bg-[#2F3136] rounded-full px-3 py-1 text-xs flex items-center mr-1">
+                    {activityType}
+                    <button
+                      className="ml-1.5 text-[#B9BBBE] hover:text-white"
+                      onClick={() => updateActivityType(null)}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </div>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-3.5 w-3.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+                
+                {filterMode === "recent" && (
+                  <div className="bg-[#2F3136] rounded-full px-3 py-1 text-xs flex items-center mr-1">
+                    Recent
+                    <button
+                      className="ml-1.5 text-[#B9BBBE] hover:text-white"
+                      onClick={() => updateFilterMode("all")}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-3.5 w-3.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+                
+                {filterMode === "meta" && (
+                  <div className="bg-[#2F3136] rounded-full px-3 py-1 text-xs flex items-center">
+                    Meta Builds
+                    <button
+                      className="ml-1.5 text-[#B9BBBE] hover:text-white"
+                      onClick={() => updateFilterMode("all")}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-3.5 w-3.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>

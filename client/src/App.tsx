@@ -1,5 +1,6 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Route, Switch, useLocation } from "wouter";
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { queryClient } from "./lib/queryClient";
 import NotFound from "@/pages/not-found";
@@ -17,10 +18,12 @@ function Router() {
   const { user, isLoading } = useAuth();
   const [location, setLocation] = useLocation();
   
-  // Redirect to auth page if accessing home while not authenticated
-  if (!isLoading && !user && location === "/") {
-    setLocation("/auth");
-  }
+  // Use useEffect for navigation to avoid React warnings
+  useEffect(() => {
+    if (!isLoading && !user && location === "/") {
+      setLocation("/auth");
+    }
+  }, [user, isLoading, location, setLocation]);
   
   return (
     <Switch>

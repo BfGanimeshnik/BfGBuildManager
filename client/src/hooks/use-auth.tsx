@@ -32,7 +32,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   } = useQuery<User, Error>({
     queryKey: ["/api/auth/me"],
     retry: false,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true, // Enable refetch on window focus
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   const loginMutation = useMutation({

@@ -12,11 +12,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use(session({
   store: storage.sessionStore,
   secret: 'albion-builds-secret-key',
-  resave: false,
-  saveUninitialized: false,
+  resave: true,
+  saveUninitialized: true,
   cookie: { 
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    httpOnly: true
   }
 }));
 

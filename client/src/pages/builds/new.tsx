@@ -9,13 +9,13 @@ export default function NewBuildPage() {
       {/* Top Navigation */}
       <header className="bg-[#2F3136] shadow-sm z-10">
         <div className="flex items-center h-16 px-6">
-          <Link href="/builds">
-            <a className="mr-4">
+          <div className="mr-4">
+            <Link href="/builds">
               <Button variant="ghost" size="icon">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
-            </a>
-          </Link>
+            </Link>
+          </div>
           <h1 className="text-xl font-bold">Create New Build</h1>
         </div>
       </header>

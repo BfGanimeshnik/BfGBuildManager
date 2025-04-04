@@ -23,17 +23,25 @@ export default function EditBuildPage() {
   useEffect(() => {
     if (data) {
       // Transform the data to match the form's expected format
+      // Important: We need to preserve the id and all structure for form updating
       const formattedData = {
         ...data,
         // Ensure required fields have non-null values
         name: data.name || "",
         activityType: data.activityType || "",
         commandAlias: data.commandAlias || "",
-        tier: data.tier || "Beginner",
+        tier: data.tier || "T8",
         // Other transformations as needed
         description: data.description || "",
         estimatedCost: data.estimatedCost || "",
-        // If more transforms are needed, add them here
+        // Make sure equipment structure is preserved
+        equipment: data.equipment || {},
+        // Make sure alternatives structure is preserved
+        alternatives: data.alternatives || {},
+        // Preserve other fields
+        isMeta: data.isMeta || false,
+        tags: data.tags || [],
+        id: data.id
       };
       
       setFormData(formattedData);

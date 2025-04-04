@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { ZodError } from "zod";
+import { z, ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { insertBuildSchema, buildSchema } from "@shared/schema";
 import multer from "multer";
@@ -178,7 +178,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Update the build
+      // Create a merged object to make sure we have all required fields
+      const mergedBuild = { ...existingBuild, ...buildData };
+      
+      try {
+        // Validate the merged build
+        buildSchema.parse(mergedBuild);
+      } catch (validationError) {
+        console.error("Validation error:", validationError);
+        return res.status(400).json({ 
+          message: "Invalid build data", 
+          errors: (validationError as ZodError).errors 
+        });
+      }
+      
+      // Update the build with the original build data (partial update)
       const updatedBuild = await storage.updateBuild(id, buildData);
       
       if (!updatedBuild) {

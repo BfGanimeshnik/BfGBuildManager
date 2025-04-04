@@ -3,8 +3,8 @@ import { Swords, Shield, ShieldHalf, Shirt, Footprints, GraduationCap, Coffee, F
 
 interface EquipmentSlotProps {
   name: string;
-  tier: string;
-  quality?: string;
+  tier: string | undefined;
+  quality?: string | undefined;
   type: string;
   size?: 'small' | 'medium' | 'large';
 }

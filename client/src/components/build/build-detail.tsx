@@ -4,18 +4,30 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Edit, Trash2, ChevronRight } from "lucide-react";
-import { type Build } from "@shared/schema";
+import { type Build, equipmentSchema, alternativesSchema } from "@shared/schema";
 import { EquipmentSlot } from "./equipment-slot";
 import { DiscordPreview } from "./discord-preview";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useQueryClient } from "@tanstack/react-query";
+import { z } from "zod";
 
 interface BuildDetailProps {
   build: Build;
 }
 
 export function BuildDetail({ build }: BuildDetailProps) {
+  // Type validation to ensure proper structure
+  const equip = equipmentSchema.parse(build.equipment);
+  const alts = build.alternatives ? alternativesSchema.parse(build.alternatives) : null;
+  
+  // Define explicit types for optional equipment pieces to avoid TypeScript errors
+  type AlternativeItem = { name: string; description?: string };
+  type TypedAlternatives = {
+    weapons?: AlternativeItem[];
+    armor?: AlternativeItem[];
+    consumables?: AlternativeItem[];
+  };
   const [, setLocation] = useLocation();
   const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
@@ -155,79 +167,79 @@ export function BuildDetail({ build }: BuildDetailProps) {
               <h3 className="text-lg font-medium mb-4">Equipment Set</h3>
               
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {build.equipment.weapon && (
+                {equip.weapon && (
                   <EquipmentSlot
-                    name={build.equipment.weapon.name}
-                    tier={build.equipment.weapon.tier}
-                    quality={build.equipment.weapon.quality}
+                    name={equip.weapon.name}
+                    tier={equip.weapon.tier}
+                    quality={equip.weapon.quality}
                     type="Weapon"
                     size="large"
                   />
                 )}
                 
-                {build.equipment.offHand && (
+                {equip.offHand && (
                   <EquipmentSlot
-                    name={build.equipment.offHand.name}
-                    tier={build.equipment.offHand.tier}
-                    quality={build.equipment.offHand.quality}
+                    name={equip.offHand.name}
+                    tier={equip.offHand.tier}
+                    quality={equip.offHand.quality}
                     type="Off-hand"
                     size="large"
                   />
                 )}
                 
-                {build.equipment.head && (
+                {equip.head && (
                   <EquipmentSlot
-                    name={build.equipment.head.name}
-                    tier={build.equipment.head.tier}
-                    quality={build.equipment.head.quality}
+                    name={equip.head.name}
+                    tier={equip.head.tier}
+                    quality={equip.head.quality}
                     type="Head"
                     size="large"
                   />
                 )}
                 
-                {build.equipment.chest && (
+                {equip.chest && (
                   <EquipmentSlot
-                    name={build.equipment.chest.name}
-                    tier={build.equipment.chest.tier}
-                    quality={build.equipment.chest.quality}
+                    name={equip.chest.name}
+                    tier={equip.chest.tier}
+                    quality={equip.chest.quality}
                     type="Chest"
                     size="large"
                   />
                 )}
                 
-                {build.equipment.shoes && (
+                {equip.shoes && (
                   <EquipmentSlot
-                    name={build.equipment.shoes.name}
-                    tier={build.equipment.shoes.tier}
-                    quality={build.equipment.shoes.quality}
+                    name={equip.shoes.name}
+                    tier={equip.shoes.tier}
+                    quality={equip.shoes.quality}
                     type="Shoes"
                     size="large"
                   />
                 )}
                 
-                {build.equipment.cape && (
+                {equip.cape && (
                   <EquipmentSlot
-                    name={build.equipment.cape.name}
-                    tier={build.equipment.cape.tier}
-                    quality={build.equipment.cape.quality}
+                    name={equip.cape.name}
+                    tier={equip.cape.tier}
+                    quality={equip.cape.quality}
                     type="Cape"
                     size="large"
                   />
                 )}
                 
-                {build.equipment.food && (
+                {equip.food && (
                   <EquipmentSlot
-                    name={build.equipment.food.name}
-                    tier={build.equipment.food.tier}
+                    name={equip.food.name}
+                    tier={equip.food.tier}
                     type="Food"
                     size="large"
                   />
                 )}
                 
-                {build.equipment.potion && (
+                {equip.potion && (
                   <EquipmentSlot
-                    name={build.equipment.potion.name}
-                    tier={build.equipment.potion.tier}
+                    name={equip.potion.name}
+                    tier={equip.potion.tier}
                     type="Potion"
                     size="large"
                   />
@@ -235,12 +247,12 @@ export function BuildDetail({ build }: BuildDetailProps) {
               </div>
             </div>
             
-            {build.alternatives && (
+            {alts && (
               <div className="bg-[#36393F] rounded-lg p-4 mb-6">
                 <h3 className="text-lg font-medium mb-4">Alternative Options</h3>
                 
                 <div className="space-y-3">
-                  {build.alternatives.weapons && build.alternatives.weapons.length > 0 && (
+                  {alts.weapons && alts.weapons.length > 0 && (
                     <div className="bg-[#2F3136] rounded-lg p-3">
                       <div className="flex items-center mb-2">
                         <div className="w-8 h-8 rounded bg-[#202225] flex items-center justify-center mr-3">
@@ -249,7 +261,7 @@ export function BuildDetail({ build }: BuildDetailProps) {
                         <h4 className="font-medium">Weapon Alternatives</h4>
                       </div>
                       <div className="pl-11">
-                        {build.alternatives.weapons.map((weapon, index) => (
+                        {alts.weapons.map((weapon, index) => (
                           <p key={index} className="text-sm mt-1">
                             <span className="font-medium">{weapon.name}</span>
                             {weapon.description && ` - ${weapon.description}`}
@@ -259,7 +271,7 @@ export function BuildDetail({ build }: BuildDetailProps) {
                     </div>
                   )}
                   
-                  {build.alternatives.armor && build.alternatives.armor.length > 0 && (
+                  {alts.armor && alts.armor.length > 0 && (
                     <div className="bg-[#2F3136] rounded-lg p-3">
                       <div className="flex items-center mb-2">
                         <div className="w-8 h-8 rounded bg-[#202225] flex items-center justify-center mr-3">
@@ -268,7 +280,7 @@ export function BuildDetail({ build }: BuildDetailProps) {
                         <h4 className="font-medium">Armor Alternatives</h4>
                       </div>
                       <div className="pl-11">
-                        {build.alternatives.armor.map((armor, index) => (
+                        {alts.armor.map((armor, index) => (
                           <p key={index} className="text-sm mt-1">
                             <span className="font-medium">{armor.name}</span>
                             {armor.description && ` - ${armor.description}`}
@@ -278,7 +290,7 @@ export function BuildDetail({ build }: BuildDetailProps) {
                     </div>
                   )}
                   
-                  {build.alternatives.consumables && build.alternatives.consumables.length > 0 && (
+                  {alts.consumables && alts.consumables.length > 0 && (
                     <div className="bg-[#2F3136] rounded-lg p-3">
                       <div className="flex items-center mb-2">
                         <div className="w-8 h-8 rounded bg-[#202225] flex items-center justify-center mr-3">
@@ -287,7 +299,7 @@ export function BuildDetail({ build }: BuildDetailProps) {
                         <h4 className="font-medium">Consumable Alternatives</h4>
                       </div>
                       <div className="pl-11">
-                        {build.alternatives.consumables.map((consumable, index) => (
+                        {alts.consumables.map((consumable, index) => (
                           <p key={index} className="text-sm mt-1">
                             <span className="font-medium">{consumable.name}</span>
                             {consumable.description && ` - ${consumable.description}`}

@@ -106,7 +106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/builds", upload.single("image"), async (req: Request, res: Response) => {
     try {
-      if (!req.session || !req.session.userId) {
+      if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
@@ -138,7 +138,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.put("/api/builds/:id", upload.single("image"), async (req: Request, res: Response) => {
     try {
-      if (!req.session || !req.session.userId) {
+      if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
@@ -193,7 +193,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.delete("/api/builds/:id", async (req: Request, res: Response) => {
     try {
-      if (!req.session || !req.session.userId) {
+      if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
@@ -233,7 +233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Bot settings endpoints
   app.get("/api/bot-settings", async (req: Request, res: Response) => {
     try {
-      if (!req.session || !req.session.userId) {
+      if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
@@ -246,7 +246,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/bot-settings", async (req: Request, res: Response) => {
     try {
-      if (!req.session || !req.session.userId) {
+      if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
       }
 

@@ -43,6 +43,17 @@ export function Sidebar() {
   const { user, logoutMutation } = useAuth();
   const isAuthenticated = !!user;
   
+  // Parse current activity type from URL
+  const getActivityTypeFromUrl = (): string | null => {
+    if (location.includes('?')) {
+      const params = new URLSearchParams(location.split('?')[1]);
+      return params.get('activityType');
+    }
+    return null;
+  };
+  
+  const currentActivityType = getActivityTypeFromUrl();
+  
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
     management: true,
     categories: true,
@@ -99,7 +110,8 @@ export function Sidebar() {
             <SidebarItem
               href="/builds"
               icon={<Package className="h-5 w-5" />}
-              current={location === "/" || location === "/builds" || location.startsWith("/builds") && !location.includes("edit") && !location.includes("new")}
+              current={(location === "/" || location === "/builds" || 
+                (location.startsWith("/builds") && !location.includes("edit") && !location.includes("new") && !location.includes("?")))}
             >
               Builds
             </SidebarItem>
@@ -150,42 +162,42 @@ export function Sidebar() {
             <SidebarItem
               href="/builds?activityType=Solo PvP"
               icon={<Swords className="h-5 w-5" />}
-              current={location === "/builds?activityType=Solo PvP"}
+              current={currentActivityType === "Solo PvP"}
             >
               Solo PvP
             </SidebarItem>
             <SidebarItem
               href="/builds?activityType=Group PvP"
               icon={<Users className="h-5 w-5" />}
-              current={location === "/builds?activityType=Group PvP"}
+              current={currentActivityType === "Group PvP"}
             >
               Group PvP
             </SidebarItem>
             <SidebarItem
               href="/builds?activityType=Ganking"
               icon={<Clock className="h-5 w-5" />}
-              current={location === "/builds?activityType=Ganking"}
+              current={currentActivityType === "Ganking"}
             >
               Ganking
             </SidebarItem>
             <SidebarItem
               href="/builds?activityType=Gathering"
               icon={<Package className="h-5 w-5" />}
-              current={location === "/builds?activityType=Gathering"}
+              current={currentActivityType === "Gathering"}
             >
               Gathering
             </SidebarItem>
             <SidebarItem
               href="/builds?activityType=Avalon"
               icon={<Globe className="h-5 w-5" />}
-              current={location === "/builds?activityType=Avalon"}
+              current={currentActivityType === "Avalon"}
             >
               Avalon
             </SidebarItem>
             <SidebarItem
               href="/builds?activityType=Farming"
               icon={<ShieldCheck className="h-5 w-5" />}
-              current={location === "/builds?activityType=Farming"}
+              current={currentActivityType === "Farming"}
             >
               Farming
             </SidebarItem>

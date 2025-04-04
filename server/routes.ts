@@ -11,10 +11,12 @@ import { initBot } from "./discord/bot";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), "dist", "public", "uploads");
+console.log("Upload directory:", uploadDir);
 
 // Ensure upload directory exists
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
+  console.log("Created upload directory");
 }
 
 const storage2 = multer.diskStorage({

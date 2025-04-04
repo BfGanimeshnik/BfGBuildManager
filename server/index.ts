@@ -3,10 +3,20 @@ import session from "express-session";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
+import fs from "fs";
+import path from "path";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Create uploads directory for images
+const uploadDir = path.join(process.cwd(), "dist", "public", "uploads");
+console.log("Ensuring upload directory exists:", uploadDir);
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+  console.log("Created upload directory");
+}
 
 // Initialize session middleware with storage's session store
 app.use(session({

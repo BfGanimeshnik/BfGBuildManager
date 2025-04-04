@@ -32,6 +32,23 @@ export function BuildDetail({ build }: BuildDetailProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Function to format date
+  const formatDate = (dateString: Date | string | null) => {
+    if (!dateString) return "Unknown";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+  
+  // Function to create an absolute URL from a relative path
+  const getAbsoluteImageUrl = (relativeUrl: string) => {
+    if (!relativeUrl) return '';
+    return `${window.location.origin}${relativeUrl}`;
+  };
 
   const handleDelete = async () => {
     if (isDeleting) return;
@@ -68,15 +85,7 @@ export function BuildDetail({ build }: BuildDetailProps) {
     }
   };
 
-  const formatDate = (dateString: Date | string | null) => {
-    if (!dateString) return "Unknown";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
+
 
   return (
     <Card className="bg-[#2F3136] border-[#202225] overflow-hidden mb-8">
@@ -128,6 +137,14 @@ export function BuildDetail({ build }: BuildDetailProps) {
           <div className="lg:col-span-1">
             <div className="bg-[#36393F] rounded-lg p-4">
               <h3 className="text-lg font-medium mb-3">Build Information</h3>
+              {build.imgUrl && (
+                <div className="mt-2 mb-4">
+                  <div className="text-[#B9BBBE] text-sm mb-1">Image URL</div>
+                  <div className="bg-[#202225]/30 rounded p-2 font-mono text-xs break-all">
+                    {build.imgUrl}
+                  </div>
+                </div>
+              )}
               
               <div className="space-y-4">
                 <div>

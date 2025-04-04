@@ -75,10 +75,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
       
-      // In a real app, you'd use proper session management
-      // For this demo, we'll use a simplified approach
-      req.session!.userId = user.id;
-      req.session!.isAdmin = user.isAdmin;
+      // Set session data
+      if (req.session) {
+        req.session.userId = user.id;
+        req.session.isAdmin = user.isAdmin;
+      }
       
       res.json({ 
         id: user.id,
@@ -91,12 +92,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   app.post("/api/auth/logout", (req: Request, res: Response) => {
-    req.session!.destroy((err) => {
-      if (err) {
-        return res.status(500).json({ message: "Failed to logout" });
-      }
+    if (req.session) {
+      req.session.destroy((err) => {
+        if (err) {
+          return res.status(500).json({ message: "Failed to logout" });
+        }
+        res.json({ message: "Logged out successfully" });
+      });
+    } else {
       res.json({ message: "Logged out successfully" });
-    });
+    }
   });
   
   app.get("/api/auth/me", async (req: Request, res: Response) => {
@@ -108,7 +113,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(req.session.userId);
       
       if (!user) {
-        req.session.destroy((err) => {});
+        if (req.session) {
+          req.session.destroy((err) => {});
+        }
         return res.status(401).json({ message: "User not found" });
       }
       

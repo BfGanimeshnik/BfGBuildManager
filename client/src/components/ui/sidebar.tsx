@@ -15,6 +15,8 @@ import {
   Plus,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useTranslation } from "@/lib/i18n";
+import { LanguageSwitcherSimple } from "@/components/language-switcher";
 
 type SidebarItemProps = {
   href: string;
@@ -42,6 +44,7 @@ const SidebarItem = ({ href, icon, children, current, onClick }: SidebarItemProp
 export function Sidebar() {
   const [location] = useLocation();
   const { user, logoutMutation } = useAuth();
+  const { t } = useTranslation();
   const isAuthenticated = !!user;
   
   // Parse URL to get current filters
@@ -110,9 +113,9 @@ export function Sidebar() {
           AO
         </div>
         <div className="ml-3">
-          <h1 className="font-bold text-lg">Albion Bot</h1>
+          <h1 className="font-bold text-lg">{t('app.title')}</h1>
           <p className="text-[#B9BBBE] text-xs">
-            {isAuthenticated ? 'Admin Dashboard' : 'Build Browser'}
+            {isAuthenticated ? t('app.subtitle.admin') : t('app.subtitle.guest')}
           </p>
         </div>
       </div>
@@ -123,7 +126,7 @@ export function Sidebar() {
         <div className="px-4 mb-3 flex items-center justify-between cursor-pointer" 
              onClick={() => toggleCategory("management")}>
           <h2 className="text-[#B9BBBE] uppercase tracking-wider text-xs font-semibold">
-            {isAuthenticated ? 'Management' : 'Navigation'}
+            {isAuthenticated ? t('sidebar.management') : t('sidebar.navigation')}
           </h2>
           <ChevronDown 
             className={`h-4 w-4 text-[#B9BBBE] transform transition-transform ${
@@ -140,7 +143,7 @@ export function Sidebar() {
               current={(location === "/" || location === "/builds" || 
                 (location.startsWith("/builds") && !location.includes("edit") && !location.includes("new") && !location.includes("?")))}
             >
-              Builds
+              {t('sidebar.menu.builds')}
             </SidebarItem>
             
             {isAuthenticated && (
@@ -150,21 +153,21 @@ export function Sidebar() {
                   icon={<Plus className="h-5 w-5" />}
                   current={location === "/builds/new"}
                 >
-                  Create Build
+                  {t('sidebar.menu.createBuild')}
                 </SidebarItem>
                 <SidebarItem
                   href="/settings"
                   icon={<Cog className="h-5 w-5" />}
                   current={location === "/settings"}
                 >
-                  Settings
+                  {t('sidebar.menu.settings')}
                 </SidebarItem>
                 <SidebarItem
                   href="/stats"
                   icon={<ChartBarStacked className="h-5 w-5" />}
                   current={location === "/stats"}
                 >
-                  Statistics
+                  {t('sidebar.menu.statistics')}
                 </SidebarItem>
               </>
             )}
@@ -175,7 +178,7 @@ export function Sidebar() {
         <div className="px-4 mt-6 mb-3 flex items-center justify-between cursor-pointer"
              onClick={() => toggleCategory("special")}>
           <h2 className="text-[#B9BBBE] uppercase tracking-wider text-xs font-semibold">
-            Special Filters
+            {t('sidebar.specialFilters')}
           </h2>
           <ChevronDown 
             className={`h-4 w-4 text-[#B9BBBE] transform transition-transform ${
@@ -195,7 +198,7 @@ export function Sidebar() {
                 handleFilterModeChange("meta");
               }}
             >
-              Meta Builds
+              {t('sidebar.filters.meta')}
             </SidebarItem>
             <SidebarItem
               href="#"
@@ -206,7 +209,7 @@ export function Sidebar() {
                 handleFilterModeChange("recent");
               }}
             >
-              Recent Builds
+              {t('sidebar.filters.recent')}
             </SidebarItem>
           </div>
         )}
@@ -215,7 +218,7 @@ export function Sidebar() {
         <div className="px-4 mt-2 mb-3 flex items-center justify-between cursor-pointer"
              onClick={() => toggleCategory("categories")}>
           <h2 className="text-[#B9BBBE] uppercase tracking-wider text-xs font-semibold">
-            Activity Types
+            {t('sidebar.activityTypes')}
           </h2>
           <ChevronDown 
             className={`h-4 w-4 text-[#B9BBBE] transform transition-transform ${
@@ -235,7 +238,7 @@ export function Sidebar() {
                 handleActivityTypeChange("Solo PvP");
               }}
             >
-              Solo PvP
+              {t('sidebar.activities.soloPvp')}
             </SidebarItem>
             <SidebarItem
               href="#"
@@ -246,7 +249,7 @@ export function Sidebar() {
                 handleActivityTypeChange("Group PvP");
               }}
             >
-              Group PvP
+              {t('sidebar.activities.groupPvp')}
             </SidebarItem>
             <SidebarItem
               href="#"
@@ -257,7 +260,7 @@ export function Sidebar() {
                 handleActivityTypeChange("Ganking");
               }}
             >
-              Ganking
+              {t('sidebar.activities.ganking')}
             </SidebarItem>
             <SidebarItem
               href="#"
@@ -268,7 +271,7 @@ export function Sidebar() {
                 handleActivityTypeChange("Gathering");
               }}
             >
-              Gathering
+              {t('sidebar.activities.gathering')}
             </SidebarItem>
             <SidebarItem
               href="#"
@@ -279,7 +282,7 @@ export function Sidebar() {
                 handleActivityTypeChange("Avalon");
               }}
             >
-              Avalon
+              {t('sidebar.activities.avalon')}
             </SidebarItem>
             <SidebarItem
               href="#"
@@ -290,7 +293,7 @@ export function Sidebar() {
                 handleActivityTypeChange("Farming");
               }}
             >
-              Farming
+              {t('sidebar.activities.farming')}
             </SidebarItem>
           </div>
         )}
@@ -307,7 +310,7 @@ export function Sidebar() {
             </div>
             <div className="ml-2">
               <p className="text-sm font-medium">{user?.username || 'Admin'}</p>
-              <p className="text-xs text-[#B9BBBE]">Online</p>
+              <p className="text-xs text-[#B9BBBE]">{t('user.status.online')}</p>
             </div>
             <div className="ml-auto flex space-x-2">
               <button 
@@ -324,8 +327,8 @@ export function Sidebar() {
               <span className="text-xs font-medium">?</span>
             </div>
             <div className="ml-2">
-              <p className="text-sm font-medium">Guest</p>
-              <p className="text-xs text-[#B9BBBE]">Browse Only</p>
+              <p className="text-sm font-medium">{t('user.guest')}</p>
+              <p className="text-xs text-[#B9BBBE]">{t('user.status.browseOnly')}</p>
             </div>
             <div className="ml-auto flex space-x-2">
               <Link href="/auth">
@@ -336,6 +339,11 @@ export function Sidebar() {
             </div>
           </>
         )}
+      </div>
+      
+      {/* Language Switcher */}
+      <div className="p-2 border-t border-[#202225] flex justify-center">
+        <LanguageSwitcherSimple />
       </div>
     </div>
   );

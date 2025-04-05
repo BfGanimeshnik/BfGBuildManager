@@ -96,6 +96,25 @@ const translations: Translations = {
   },
   
   'ru': {
+    // Детали сборки
+    'build.detail.weapon_alternatives': 'Альтернативное оружие',
+    'build.detail.armor_alternatives': 'Альтернативная броня',
+    'build.detail.consumable_alternatives': 'Альтернативные расходники',
+    'build.detail.build_info': 'Информация о сборке',
+    'build.detail.equipment_set': 'Комплект экипировки',
+    'build.detail.last_updated': 'Последнее обновление',
+    'build.detail.estimated_cost': 'Примерная стоимость',
+    'build.detail.command_usage': 'Использование команды',
+    'build.detail.no_description': 'Описание отсутствует',
+    'build.detail.delete_confirm': 'Вы уверены, что хотите удалить эту сборку?',
+    'build.detail.delete_warning': 'Это действие нельзя отменить.',
+    'build.detail.edit_build': 'Редактировать',
+    'build.detail.back_to_builds': 'Назад к сборкам',
+    'build.detail.loading': 'Загрузка сборки...',
+    'build.detail.not_found': 'Сборка не найдена',
+    'build.detail.load_error': 'Не удалось загрузить сборку',
+    'build.detail.no_permission': 'Сборка не существует или у вас нет прав для её просмотра.',
+
     // Общие элементы интерфейса
     'app.title': 'Менеджер Сборок Альбион Онлайн',
     'app.subtitle.admin': 'Панель Администратора',

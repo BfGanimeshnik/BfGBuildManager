@@ -136,7 +136,7 @@ export function BuildDetail({ build }: BuildDetailProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1">
             <div className="bg-[#36393F] rounded-lg p-4">
-              <h3 className="text-lg font-medium mb-3">Build Information</h3>
+              <h3 className="text-lg font-medium mb-3">{t('build.detail.build_info')}</h3>
               {build.imgUrl && (
                 <div className="mt-2 mb-4">
                   <div className="text-[#B9BBBE] text-sm mb-1">Build Image</div>

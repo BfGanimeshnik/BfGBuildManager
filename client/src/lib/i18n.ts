@@ -357,6 +357,36 @@ const translations: Translations = {
     'auth.password': 'Пароль',
     'auth.error.title': 'Ошибка Аутентификации',
     'auth.error.message': 'Неверное имя пользователя или пароль',
+
+    // Детали сборки
+    'build.detail.meta_badge': 'МЕТА',
+    'build.detail.general_info': 'Общая информация',
+    'build.detail.activity_type': 'Тип активности',
+    'build.detail.tier': 'Базовый тир',
+    'build.detail.cost': 'Стоимость',
+    'build.detail.equipment': 'Экипировка',
+    'build.detail.weapon': 'Оружие',
+    'build.detail.offhand': 'Второстепенное оружие',
+    'build.detail.head': 'Шлем',
+    'build.detail.armor': 'Броня',
+    'build.detail.shoes': 'Обувь',
+    'build.detail.cape': 'Плащ',
+    'build.detail.consumables': 'Расходники',
+    'build.detail.food': 'Еда',
+    'build.detail.potion': 'Зелье',
+    'build.detail.additional_info': 'Дополнительная информация',
+    'build.detail.alternatives': 'Альтернативы',
+    'build.detail.no_alternatives': 'Нет альтернатив',
+    'build.detail.actions': 'Действия',
+    'build.detail.edit': 'Редактировать',
+    'build.detail.delete': 'Удалить',
+    'build.detail.share': 'Поделиться',
+    'build.detail.copy_link': 'Копировать ссылку',
+    'build.detail.copied': 'Скопировано!',
+    'build.detail.discord_preview': 'Предпросмотр в Discord',
+    'build.detail.loading_error': 'Ошибка при загрузке сборки',
+    'build.detail.not_found': 'Сборка не найдена',
+    'build.detail.back': 'Назад к списку'
   }
 };
 
